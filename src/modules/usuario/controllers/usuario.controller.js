@@ -47,7 +47,7 @@ class UsuarioController {
   }
 
   // 📋 Listar todos os usuários
-  static async listar(req, res) {
+  static async listarUsuarios(req, res) {
     try {
       const usuarios = await Usuario.findAll({
         attributes: ["codigo_usuario", "nome", "email"]
@@ -65,6 +65,11 @@ class UsuarioController {
       });
     }
   }
+  
+   static listarAssinantes(req, res){
+    res.status(200).json({mensagem: 'Listando assiantes...'})
+  }
+
 
   // ✏️ Atualizar dados de um usuário
   static async editar(req, res) {

@@ -3,9 +3,12 @@ const dotenv = require('dotenv');
 const cors = require('cors');
 const { sequelize } = require('./src/config/database');
 
-const authRoute = require('./src/modules/login_logout/routes/login_logout.route');
+// const authRoute = require('./src/modules/login_logout/routes/login_logout.route');
 const usuarioRoute = require('./src/modules/usuario/routes/usuario.route');
 const assinaturaRoute = require('./src/modules/assinatura/routes/assinatura.route');
+const loginLogoutRoutes = require('./src/modules/login_logout/routes/login_logout.route');
+
+
 
 
 // Relacionamentos entre models
@@ -25,7 +28,7 @@ app.use(cors({
 app.use(express.json());
 
 // Rotas principais
-app.use('/api/', authRoute);        // /api/login, /api/logout, /api/refresh-token
+app.use('/api/', loginLogoutRoutes);        // /api/login, /api/logout, /api/refresh-token
 app.use('/api/', usuarioRoute);     // /api/usuarios
 app.use('/api/', assinaturaRoute);  // /api/assinaturas
 
