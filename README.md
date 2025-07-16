@@ -86,7 +86,7 @@ node_modules
 │   ├── config/
 │   │   └── database.js
 │   │
-│   ├── modulos/
+│   ├── modules/
 │   │   ├── usuario/
 │   │   │   ├── controllers/
 │   │   │   │   └── usuario.controller.js

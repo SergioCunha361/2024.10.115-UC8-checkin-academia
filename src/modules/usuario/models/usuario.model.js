@@ -22,7 +22,16 @@ const Usuario = sequelize.define(
         },
       },
     },
-
+    papel: {
+      type: DataTypes.ENUM("aluno", "professor", "secretario"),
+      allowNull: false,
+      validate: {
+        isIn: {
+          args: [["aluno", "professor", "secretario"]],
+          msg: "O papel deve ser aluno, professor ou secretario.",
+        },
+      },
+    },
     email: {
       type: DataTypes.STRING(100),
       allowNull: false,
@@ -39,12 +48,12 @@ const Usuario = sequelize.define(
     senha: {
       type: DataTypes.STRING,
       allowNull: false,
-      // validate: {
-      //   is: {
-      //     args: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,10}$/,
-      //     msg: "A senha deve ter de 6 a 10 caracteres, com pelo menos 1 letra maiúscula, 1 minúscula, 1 número e 1 caractere especial.",
-      //   },
-      // },
+      validate: {
+        // is: {
+        //   args: /^[A-Za-z0-9]{6,10}$/,
+        //   msg: "A senha deve ter de 6 a 10 caracteres, com pelo menos 1 letra maiúscula, 1 minúscula, 1 número e 1 caractere especial.",
+        // },
+      },
     },
   },
   {

@@ -3,7 +3,7 @@ const dotenv = require('dotenv');
 const cors = require('cors');
 const { sequelize } = require('./src/config/database');
 
-const authRoute = require('./src/modules/autenticacao/routes/autenticacao.route');
+const authRoute = require('./src/modules/login_logout/routes/login_logout.route');
 const usuarioRoute = require('./src/modules/usuario/routes/usuario.route');
 const assinaturaRoute = require('./src/modules/assinatura/routes/assinatura.route');
 
@@ -37,7 +37,7 @@ app.listen(PORTA, async () => {
         await sequelize.authenticate();
         console.log('✅ Conexão com o banco de dados estabelecida.');
 
-        await sequelize.sync({ alter: false, force: false });
+        await sequelize.sync({ alter: true, force: true });
         console.log('✅ Banco de dados sincronizado.');
     } catch (err) {
         console.error('❌ Erro ao conectar ou sincronizar o banco de dados:', err);
