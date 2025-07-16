@@ -1,12 +1,14 @@
-const Usuario = require("./modules/usuario/models/usuario.model");
-const Assinatura = require("./modules/assinatura/models/assinatura.model");
+const Aluno = require("./modules/aluno/models/aluno.model");
+const Checkin = require("./modules/checkin/models/checkin.model");
 
-Usuario.hasMany(Assinatura, {
-  foreignKey: 'codigo_usuario',
-  as: 'assinaturas'
+// Um Aluno tem muitos Checkins
+Aluno.hasMany(Checkin, {
+  foreignKey: "alunoId",
+  sourceKey: "matricula",
 });
 
-Assinatura.belongsTo(Usuario, {
-  foreignKey: 'codigo_usuario',
-  as: 'usuario'
+// Um Checkin pertence a um Aluno
+Checkin.belongsTo(Aluno, {
+  foreignKey: "alunoId",
+  targetKey: "matricula",
 });

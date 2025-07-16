@@ -3,48 +3,46 @@ const dotenv = require('dotenv');
 const cors = require('cors');
 const { sequelize } = require('./src/config/database');
 
-// const authRoute = require('./src/modules/login_logout/routes/login_logout.route');
-const usuarioRoute = require('./src/modules/usuario/routes/usuario.route');
-const assinaturaRoute = require('./src/modules/assinatura/routes/assinatura.route');
-const loginLogoutRoutes = require('./src/modules/login_logout/routes/login_logout.route');
-
-
-
+// Rotas corretas do seu projeto
+const alunoRoute = require('./src/modules/aluno/routes/aluno.route');
+const instrutorRoute = require('./src/modules/instrutor/routes/instrutor.route');
+const checkinRoute = require('./src/modules/checkin/routes/checkin.route');
 
 // Relacionamentos entre models
-require('./src/realcionamento');
+require('./src/relacionamento');
 
 // Configuração do ambiente
 dotenv.config();
 
 const app = express();
 
-// Libera o acesso do frontend (ex: React)
+// Libera acesso do frontend (ex: React)
 app.use(cors({
-    origin: 'http://localhost:5173',
-    credentials: true
+  origin: 'http://localhost:5173',
+  credentials: true
 }));
 
 app.use(express.json());
 
 // Rotas principais
-app.use('/api/', loginLogoutRoutes);        // /api/login, /api/logout, /api/refresh-token
-app.use('/api/', usuarioRoute);     // /api/usuarios
-app.use('/api/', assinaturaRoute);  // /api/assinaturas
+app.use('/alunos', alunoRoute);
+app.use('/instrutores', instrutorRoute);
+app.use('/checkins', checkinRoute);
 
-// Inicia servidor
-const PORTA = process.env.PORTA || 3001;
+// Porta padrão ou configurável
+const PORT = process.env.PORT || 3000;
 
-app.listen(PORTA, async () => {
-    try {
-        await sequelize.authenticate();
-        console.log('✅ Conexão com o banco de dados estabelecida.');
+// Inicia o servidor e sincroniza o banco
+app.listen(PORT, async () => {
+  try {
+    await sequelize.authenticate();
+    console.log('✅ Conexão com o banco de dados estabelecida.');
 
-        await sequelize.sync({ alter: true, force: true });
-        console.log('✅ Banco de dados sincronizado.');
-    } catch (err) {
-        console.error('❌ Erro ao conectar ou sincronizar o banco de dados:', err);
-    }
+    await sequelize.sync({ alter: true }); // `force: true` apaga tudo – cuidado!
+    console.log('✅ Banco de dados sincronizado.');
+  } catch (err) {
+    console.error('❌ Erro ao conectar ou sincronizar o banco de dados:', err);
+  }
 
-    console.log(`🚀 Servidor rodando em http://localhost:${PORTA}`);
+  console.log(`🚀 Servidor rodando em http://localhost:${PORT}`);
 });
