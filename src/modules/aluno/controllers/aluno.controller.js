@@ -7,28 +7,7 @@ class AlunoController {
       if (!nome || !email || !senha || !matricula || !plano) {
         return res
           .status(400)
-          .json({ msg: "Todos os campos devem serem preenchidos!" });
-      }
-
-      const regexSenha =
-        /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,10}$/;
-      if (!regexSenha.test(senha)) {
-        return res.status(400).json({
-          msg: "Erro de validação",
-          erro: [
-            "A senha deve ter de 6 a 10 caracteres, com pelo menos uma letra, um número e um caractere especial.",
-          ],
-        });
-      }
-
-      const regexMatricula = /^[A-Za-z]\d{8}$/;
-      if (!regexMatricula.test(matricula)) {
-        return res.status(400).json({
-          msg: "Erro de validação",
-          erro: [
-            "A matrícula deve iniciar com uma letra e conter exatamente 8 números.",
-          ],
-        });
+          .json({ msg: "Todos os campos devem serem preenchidos!", error: error.message });
       }
 
       // criptografando a senha
@@ -39,9 +18,9 @@ class AlunoController {
       await Aluno.create({
         nome,
         email,
-        senha: senhaCriptografada,
         matricula,
         plano,
+        senha: senhaCriptografada
       });
       res.status(200).json({ msg: "Aluno criado com sucesso" });
     } catch (error) {
