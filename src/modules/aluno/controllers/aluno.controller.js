@@ -1,21 +1,51 @@
 const Aluno = require("../models/aluno.model");
 const bcrypt = require("bcryptjs");
 class AlunoController {
-  static async cadastrar(req, res) { 
+  static async cadastrar(req, res) {
     try {
-      const {nome, email, senha, matricula, plano} = req.body;
-      if (!nome || !email || !senha || !matricula || !plano ) {
-          return res.status(400).json({ msg: "Todos os campos devem serem preenchidos!" });
+      const { nome, email, senha, matricula, plano } = req.body;
+      if (!nome || !email || !senha || !matricula || !plano) {
+        return res
+          .status(400)
+          .json({ msg: "Todos os campos devem serem preenchidos!" });
       }
+
+      const regexSenha =
+        /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,10}$/;
+      if (!regexSenha.test(senha)) {
+        return res.status(400).json({
+          msg: "Erro de validação",
+          erro: [
+            "A senha deve ter de 6 a 10 caracteres, com pelo menos uma letra, um número e um caractere especial.",
+          ],
+        });
+      }
+
+      const regexMatricula = /^[A-Za-z]\d{8}$/;
+      if (!regexMatricula.test(matricula)) {
+        return res.status(400).json({
+          msg: "Erro de validação",
+          erro: [
+            "A matrícula deve iniciar com uma letra e conter exatamente 8 números.",
+          ],
+        });
+      }
+
       // criptografando a senha
-      const senhaCriptografada = await bcrypt.hash(senha, 15);
+      const senhaCriptografada = await bcrypt.hash(senha, 10);
       const existe = await Aluno.findByPk(matricula);
       if (existe) return res.status(409).json({ msg: "Matrícula já existe" });
 
-      await Aluno.create({ nome, email, senha: senhaCriptografada, matricula, plano});
+      await Aluno.create({
+        nome,
+        email,
+        senha: senhaCriptografada,
+        matricula,
+        plano,
+      });
       res.status(200).json({ msg: "Aluno criado com sucesso" });
     } catch (error) {
-       console.error("Erro completo:", error);
+      console.error("Erro completo:", error);
       if (error.name === "SequelizeValidationError") {
         return res.status(400).json({
           msg: "Erro de validação",
@@ -28,43 +58,33 @@ class AlunoController {
       });
     }
   }
-
-  static async listarPorMatricula(req, res) {
+  static async listarPerfil(req, res) {
     try {
-      const { matricula } = req.params;
+      const { id: matricula } = req.usuario; // ← ID vem do token e é a matrícula
+
       const aluno = await Aluno.findOne({
         where: { matricula },
-        attributes: [
-          "nome",
-          "email",
-          "matricula",
-          "plano",          
-        ],
+        attributes: ["nome", "email", "matricula", "plano"],
       });
 
       if (!aluno) {
         return res.status(404).json({ msg: "Não existe aluno cadastrado!" });
       }
+
       res.status(200).json(aluno);
     } catch (error) {
-      res
-        .status(500)
-        .json({
-          msg: "Erro do servidor. Tente novamente mais tarde!",
-          erro: error.message,
-        });
+      res.status(500).json({
+        msg: "Erro do servidor. Tente novamente mais tarde!",
+        erro: error.message,
+      });
     }
   }
+  F;
 
   static async listarTodos(req, res) {
     try {
       const alunos = await Aluno.findAll({
-        attributes: [
-          "nome",
-          "email",
-          "matricula",
-          "plano",  
-        ],
+        attributes: ["nome", "email", "matricula", "plano"],
       });
 
       if (!alunos || alunos.length === 0) {
@@ -131,4 +151,3 @@ class AlunoController {
 }
 
 module.exports = AlunoController;
-

@@ -25,12 +25,12 @@ const Aluno = sequelize.define(
     senha: {
       type: DataTypes.STRING,
       allowNull: false,
-      validate: {
-        is: {
-          args: /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,10}$/,
-          msg: "A senha deve ter de 6 a 10 caracteres, com pelo menos uma letra, um número e um caractere especial."
-        }
-      }
+      // validate: {
+      //   is: {
+      //     args: /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,10}$/,
+      //     msg: "A senha deve ter de 6 a 10 caracteres, com pelo menos uma letra, um número e um caractere especial."
+      //   }
+      // }
     },
     matricula: {
       type: DataTypes.STRING,

@@ -9,7 +9,9 @@ const instrutorRoute = require('./src/modules/instrutor/routes/instrutor.route')
 const checkinRoute = require('./src/modules/checkin/routes/checkin.route');
 
 // Relacionamentos entre models
-require('./src/relacionamento');
+require('./src/realcionamento.js');
+
+
 
 // Configuração do ambiente
 dotenv.config();
@@ -25,9 +27,9 @@ app.use(cors({
 app.use(express.json());
 
 // Rotas principais
-app.use('/alunos', alunoRoute);
-app.use('/instrutores', instrutorRoute);
-app.use('/checkins', checkinRoute);
+app.use('/api/', alunoRoute);
+app.use('/api/', instrutorRoute);
+app.use('/api/', checkinRoute);
 
 // Porta padrão ou configurável
 const PORT = process.env.PORT || 3000;
@@ -38,7 +40,8 @@ app.listen(PORT, async () => {
     await sequelize.authenticate();
     console.log('✅ Conexão com o banco de dados estabelecida.');
 
-    await sequelize.sync({ alter: true }); // `force: true` apaga tudo – cuidado!
+    await sequelize.sync({ alter: false , force: false }); // `force: true` apaga tudo – cuidado!
+    // force: false não apaga os dados do banco cada vez que vc subir o servidor
     console.log('✅ Banco de dados sincronizado.');
   } catch (err) {
     console.error('❌ Erro ao conectar ou sincronizar o banco de dados:', err);

@@ -1,4 +1,5 @@
-const Aluno = require("../models/aluno.model");
+const Aluno = require('../../aluno/models/aluno.model');
+
 const bcrypt = require("bcryptjs");
 class AlunoController {
   static async cadastrar(req, res) { 

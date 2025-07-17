@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const InstrutorController = require("../controllers/instrutor.controller");
-const AutenticacaoMiddleware = require("../../../middleware/autenticacao.middleware");
+const AutenticacaoMiddleware = require("../../../middleware/autenticacao.usuario.middleware");
 
 // Cadastro e login não exigem autenticação
 router.post("/", InstrutorController.cadastrar);

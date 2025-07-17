@@ -1,6 +1,6 @@
 const express = require('express');
 const AlunoController = require('../controllers/aluno.controller');
-const AutenticacaoMiddleware = require('../../login_logout/controllers/login_logout.controller');
+const AutenticacaoMiddleware = require('../../../middleware/autenticacao.usuario.middleware');
 const LoginLogout = require('../../login_logout/controllers/login_logout.controller');
 
 
@@ -15,7 +15,7 @@ router.post('/login', LoginLogout.login);
 
 // 🔐 Rotas privadas (token obrigatório)
 
-router.get('/aluno/:matricula', AutenticacaoMiddleware.autenticarToken, AlunoController.listarPorMatricula);
+router.get('/aluno/perfil', AutenticacaoMiddleware.autenticarToken, AlunoController.listarPerfil);
 router.put('/aluno/:matricula', AutenticacaoMiddleware.autenticarToken, AlunoController.atualizarPorMatricula);
 router.delete('/aluno/:matricula', AutenticacaoMiddleware.autenticarToken, AlunoController.excluirPorMatricula);
 

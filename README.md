@@ -1,200 +1,189 @@
-# 📚 Sistema de Gestão de Assinaturas Digitais
+# Atividade Prática – Controle de Check-in/out de Academia
 
-Sistema backend desenvolvido em Node.js para gerenciar usuários e suas assinaturas de revistas. Utiliza Express, Sequelize e PostgreSQL com autenticação JWT. Estrutura modular, validação de dados e controle de acesso por token.
+## Objetivo
 
----
-
-## ✅ Fluxo de Funcionamento
-
-1. **Cadastro de Usuário:**
-   O primeiro passo é cadastrar um usuário informando:
-
-   * nome
-
-   * e-mail
-
-   * senha
-
-   > O `codigo_usuario` é gerado automaticamente pelo sistema como chave primária.
-
-2. **Validação de Dados:**
-   O sistema valida o formato do e-mail e a força da senha (com regex).
-
-3. **Login:**
-   O usuário realiza login com e-mail e senha cadastrados.
-   Se os dados estiverem corretos, o sistema gera um **token JWT**.
-
-4. **Uso do Token:**
-   Com o token, o usuário pode:
-
-   * acessar os dados da própria conta (usuários)
-   * realizar operações de CRUD nas assinaturas vinculadas ao seu código de usuário
-
-   ⚠️ **Importante:** Só é possível cadastrar uma assinatura com um `codigo_usuario` já existente no banco.
+Desenvolver um sistema completo de controle de check-in e check-out de alunos em uma academia, utilizando **Express.js**, **Sequelize**, **PostgreSQL**, autenticação **JWT** e boas práticas de código em **JavaScript**.
 
 ---
 
-## 🚀 Como iniciar o projeto
+## Funcionalidades Obrigatórias
 
-### 1. Criar a pasta e abrir no VS Code
+### Usuários
 
-```bash
-mkdir assinaturas-digitais && cd assinaturas-digitais
-code .
+- **Aluno** e **Instrutor** (módulos separados)
+- Cadastro, autenticação (JWT), consulta de perfil
+- Aluno faz check-in/check-out
+- Instrutor pode visualizar e editar registros de qualquer aluno
+- Autorização nas rotas via middleware
+
+### Check-in/out
+
+- CRUD completo de check-ins/check-outs
+- Cada registro pertence a um aluno
+- Instrutor pode corrigir check-in/out de qualquer aluno
+
+---
+
+## Tecnologias
+
+- Express.js
+- Sequelize (PostgreSQL)
+- bcrypt
+- jsonwebtoken (JWT)
+- express-validator
+- dotenv
+
+---
+
+## Estrutura de Diretórios
+
 ```
-
-### 2. Inicializar o projeto Node
-
-```bash
-npm init -y
-```
-
-### 3. Instalar dependências
-
-```bash
-npm install express pg pg-hstore sequelize bcryptjs dotenv jsonwebtoken cors
-```
-
-### 4. Inicializar o repositório Git
-
-```bash
-git init
-```
-
-### 5. Criar `.gitignore`
-
-```
-node_modules
-.env
-```
-
-### 6. Criar arquivos raiz
-
-* `.env`
-* `.envExample.md`
-* `README.md`
-* `index.js`
-
-### 7. Criar estrutura de pastas e arquivos:
-
-```bash
-📁 assinaturas-digitais
+2024.10.115-UC8
 │
-├── node_modules/
-│
-├── src/
-│   ├── config/
-│   │   └── database.js
-│   │
-│   ├── modules/
-│   │   ├── usuario/
-│   │   │   ├── controllers/
-│   │   │   │   └── usuario.controller.js
-│   │   │   ├── middleware/
-│   │   │   │   └── usuario.middleware.js
-│   │   │   ├── models/
-│   │   │   │   └── usuario.model.js
-│   │   │   └── routes/
-│   │   │       └── usuario.route.js
-│   │   │
-│   │   ├── autenticacao/
-│   │   │   ├── controllers/
-│   │   │   │   └── autenticacao.controller.js
-│   │   │   ├── middleware/
-│   │   │   │   └── auth.middleware.js
-│   │   │   └── routes/
-│   │   │       └── autenticacao.route.js
-│   │   │
-│   │   └── assinatura/
-│   │       ├── controllers/
-│   │       │   └── assinatura.controller.js
-│   │       ├── middleware/
-│   │       │   └── assinatura.middleware.js
-│   │       ├── models/
-│   │       │   └── assinatura.model.js
-│   │       └── routes/
-│   │           └── assinatura.route.js
-│   │
-│   ├── utils/
-│   │   └── validarCampos.js
-│   │
-│   └── relacionamento.js
-│
+├── node_modules
+├── src
+│   ├── config
+│   │   └── configDB.js
+│   ├── middleware
+│   │   ├── autenticacao.middleware.js
+│   │   └── autorizacao.middleware.js
+│   ├── modulos
+│   │   ├── aluno
+│   │   │   ├── controllers
+│   │   │   │   └── aluno.controller.js
+│   │   │   ├── models
+│   │   │   │   └── aluno.model.js
+│   │   │   └── routes
+│   │   │       └── aluno.route.js
+│   │   ├── instrutor
+│   │   │   ├── controllers
+│   │   │   │   └── instrutor.controller.js
+│   │   │   ├── models
+│   │   │   │   └── instrutor.model.js
+│   │   │   └── routes
+│   │   │       └── instrutor.route.js
+│   │   └── checkin
+│   │       ├── controllers
+│   │       │   └── checkin.controller.js
+│   │       ├── models
+│   │       │   └── checkin.model.js
+│   │       └── routes
+│   │           └── checkin.route.js
 ├── .env
-├── .envExample.md
+├── .env.example
 ├── .gitignore
 ├── index.js
 ├── package.json
-└── package-lock.json
+└── README.md
 ```
 
 ---
 
-## ✅ Campos e Regras dos Módulos
+## Modelos e Relacionamentos
 
-### 👤 1. Usuário
+### Aluno
 
-```diff
-+ codigo_usuario ...... INTEGER, PK, AUTO INCREMENT, obrigatório
-+ nome ................ STRING (10 a 50 caracteres), obrigatório
-+ email ............... STRING (10 a 100 caracteres), obrigatório, único, formato válido
-+ senha ............... STRING (6 a 10 caracteres, com 1 letra maiúscula, 1 minúscula, 1 número e 1 caractere especial), obrigatório
+- `nome`
+- `email` (único)
+- `senha` (hash)
+- `matricula` (única)
+- `plano`
+
+### Instrutor
+
+- `nome`
+- `email` (único)
+- `senha` (hash)
+- `cref`
+
+### Checkin
+
+- `alunoId` (FK)
+- `data_hora_entrada` (Date)
+- `data_hora_saida` (Date, opcional no check-in)
+- `plano` (string, cópia do aluno/plano na data)
+
+---
+
+## Rotas Obrigatórias
+
+### Alunos
+
+| Método | Rota           | Descrição         | Autenticação |
+|--------|----------------|-------------------|--------------|
+| POST   | /alunos        | Cadastro          | Não          |
+| POST   | /alunos/login  | Login (JWT)       | Não          |
+| GET    | /alunos/me     | Perfil do aluno   | Sim (JWT)    |
+
+### Instrutores
+
+| Método | Rota               | Descrição             | Autenticação |
+|--------|--------------------|-----------------------|--------------|
+| POST   | /instrutores       | Cadastro              | Não          |
+| POST   | /instrutores/login | Login (JWT)           | Não          |
+| GET    | /instrutores/me    | Perfil do instrutor   | Sim (JWT)    |
+
+### Check-ins
+
+| Método | Rota           | Descrição                | Autenticação | Permissão                        |
+|--------|----------------|--------------------------|--------------|----------------------------------|
+| GET    | /checkins      | Listar check-ins         | Sim (JWT)    | Aluno vê seus, instrutor vê todos|
+| GET    | /checkins/:id  | Detalhe do check-in      | Sim (JWT)    | Dono do registro ou instrutor    |
+| POST   | /checkins      | Registrar check-in       | Sim (JWT)    | Apenas aluno próprio             |
+| PUT    | /checkins/:id  | Atualizar registro       | Sim (JWT)    | Aluno (próprio), instrutor       |
+| DELETE | /checkins/:id  | Excluir registro         | Sim (JWT)    | Apenas instrutor                 |
+
+---
+
+## Validações Obrigatórias
+
+- E-mail único para cada tipo de usuário
+- Senha: mínimo 6 caracteres, obrigatoriamente criptografada
+- Nenhum campo obrigatório pode ser nulo/vazio
+- Matrícula única para aluno
+- Ao fazer check-in: `data_hora_entrada` obrigatória, `data_hora_saida` pode ser nula
+- Apenas instrutor pode excluir qualquer registro
+- Aluno só pode registrar e atualizar seus próprios check-ins
+
+---
+
+## Exemplo de `.env.example`
+
+```env
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=academia
+DB_USER=postgres
+DB_PASSWORD=sua_senha
+JWT_SECRET=umsegredoseguro
 ```
 
 ---
 
-### 📝 2. Assinatura
+## Critérios de Avaliação
 
-```diff
-+ codigo_assinatura ... INTEGER, PK, AUTO INCREMENT, obrigatório
-+ codigo_usuario ...... INTEGER, FK → usuarioDigital.codigo_usuario
-+ revista_nome ........ STRING (3 a 50 caracteres), obrigatório
-+ data_inicio ......... DATEONLY, obrigatório
-+ data_fim ............ DATEONLY, obrigatório, maior que data_inicio
-+ status .............. ENUM [ativa, cancelada, expirada], padrão: ativa
-```
-
-> ⚠️ Cada assinatura pertence obrigatoriamente a um usuário já cadastrado.
+- Estrutura de pastas exatamente como descrita
+- Models e relacionamentos corretos
+- Controllers finos (regras em services)
+- Validações, autenticação e autorização funcionando
+- Senhas criptografadas
+- Middlewares aplicados corretamente
+- Projeto funcionando de ponta a ponta
+- Código limpo e padronizado
 
 ---
 
-## 🔐 Rotas e Autenticação
+## Fontes Oficiais
 
-### 👤 Usuários
-
-| Método | Rota      | Ação            | Autenticação |
-| ------ | --------- | --------------- | ------------ |
-| POST   | /usuarios | Cadastro        | ❌ Não        |
-| GET    | /usuarios | Listar usuários | ✅ Sim (JWT)  |
-
----
-
-### 🔑 Autenticação
-
-| Método | Rota   | Ação               | Autenticação |
-| ------ | ------ | ------------------ | ------------ |
-| POST   | /login | Autenticar usuário | ❌ Não        |
+- [Express.js](https://expressjs.com/)
+- [Sequelize](https://sequelize.org/)
+- [bcrypt](https://www.npmjs.com/package/bcrypt)
+- [jsonwebtoken](https://www.npmjs.com/package/jsonwebtoken)
+- [express-validator](https://express-validator.github.io/)
+- [dotenv](https://www.npmjs.com/package/dotenv)
 
 ---
 
-### 📄 Assinaturas
+## Nome do Repositório
 
-| Método | Rota              | Ação                  | Autenticação |
-| ------ | ----------------- | --------------------- | ------------ |
-| GET    | /assinaturas      | Listar todas          | ✅ Sim (JWT)  |
-| GET    | /assinaturas/\:id | Detalhar por ID       | ✅ Sim (JWT)  |
-| POST   | /assinaturas      | Criar nova assinatura | ✅ Sim (JWT)  |
-| PUT    | /assinaturas/\:id | Atualizar assinatura  | ✅ Sim (JWT)  |
-| DELETE | /assinaturas/\:id | Excluir assinatura    | ✅ Sim (JWT)  |
-
----
-
-## 🛠️ Autor e Contribuição
-
-Este projeto é parte de um estudo prático para aprendizado de:
-
-* Estruturação de API REST
-* Sequelize e relacionamentos
-* Middleware e validações
-* Autenticação com JWT
-* Boas práticas com Express.js
+**2024.10.115-UC8-checkin-academia**
