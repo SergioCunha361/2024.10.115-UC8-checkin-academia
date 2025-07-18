@@ -8,9 +8,10 @@ const router = express.Router();
 
 // 🔓 Rota pública (cadastro)
 router.post('/alunos', AlunoController.cadastrar);
+router.get('/alunos/listarTodos', AlunoController.listarTodos);
 
-// Login do aluno 
-router.post('/login', LoginLogout.login);
+// 
+
 
 
 // 🔐 Rotas privadas (token obrigatório)
@@ -18,6 +19,8 @@ router.post('/login', LoginLogout.login);
 router.get('/aluno/perfil', AutenticacaoMiddleware.autenticarToken, AlunoController.listarPerfil);
 router.put('/aluno/:matricula', AutenticacaoMiddleware.autenticarToken, AlunoController.atualizarPorMatricula);
 router.delete('/aluno/:matricula', AutenticacaoMiddleware.autenticarToken, AlunoController.excluirPorMatricula);
+
+
 
 
 module.exports = router;

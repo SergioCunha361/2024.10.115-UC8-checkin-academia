@@ -7,6 +7,7 @@ const { sequelize } = require('./src/config/database');
 const alunoRoute = require('./src/modules/aluno/routes/aluno.route');
 const instrutorRoute = require('./src/modules/instrutor/routes/instrutor.route');
 const checkinRoute = require('./src/modules/checkin/routes/checkin.route');
+const loginLogoutRoute = require('./src/modules/login_logout/routes/login_logout.route');
 
 // Relacionamentos entre models
 require('./src/realcionamento.js');
@@ -30,6 +31,7 @@ app.use(express.json());
 app.use('/api/', alunoRoute);
 app.use('/api/', instrutorRoute);
 app.use('/api/', checkinRoute);
+app.use('/api/', loginLogoutRoute);
 
 // Porta padrão ou configurável
 const PORT = process.env.PORT || 3000;
@@ -40,7 +42,7 @@ app.listen(PORT, async () => {
     await sequelize.authenticate();
     console.log('✅ Conexão com o banco de dados estabelecida.');
 
-    await sequelize.sync({ alter: true , force: true }); // `force: true` apaga tudo – cuidado!
+    await sequelize.sync({ alter: false , force: false }); // `force: true` apaga tudo – cuidado!
     // force: false não apaga os dados do banco cada vez que vc subir o servidor
     console.log('✅ Banco de dados sincronizado.');
   } catch (err) {
