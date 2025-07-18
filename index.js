@@ -4,10 +4,10 @@ const cors = require('cors');
 const { sequelize } = require('./src/config/database');
 
 // Rotas corretas do seu projeto
+const loginLogoutRoute = require('./src/modules/login_logout/routes/login_logout.route');
 const alunoRoute = require('./src/modules/aluno/routes/aluno.route');
 const instrutorRoute = require('./src/modules/instrutor/routes/instrutor.route');
 const checkinRoute = require('./src/modules/checkin/routes/checkin.route');
-const loginLogoutRoute = require('./src/modules/login_logout/routes/login_logout.route');
 
 // Relacionamentos entre models
 require('./src/realcionamento.js');
@@ -28,10 +28,11 @@ app.use(cors({
 app.use(express.json());
 
 // Rotas principais
+app.use('/api/', loginLogoutRoute);
 app.use('/api/', alunoRoute);
 app.use('/api/', instrutorRoute);
 app.use('/api/', checkinRoute);
-app.use('/api/', loginLogoutRoute);
+
 
 // Porta padrão ou configurável
 const PORT = process.env.PORT || 3000;

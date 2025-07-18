@@ -102,6 +102,7 @@ class AutenticacaoController {
   }
 
   static async sair(req, res) {
+    console.log(">>> Entrou no controller sair");
     try {
       res.clearCookie("refreshToken", {
         httpOnly: true,
