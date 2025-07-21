@@ -2,6 +2,7 @@ const Aluno = require("../models/aluno.model");
 const bcrypt = require("bcryptjs");
 class AlunoController {
   static async cadastrar(req, res) {
+    console.log("BODY RECEBIDO: ", req.body);  //para saber se está carregando e aparecer no console o body
     try {
       const { nome, email, senha, matricula, plano } = req.body;
       if (!nome || !email || !senha || !matricula || !plano) {
@@ -10,10 +11,12 @@ class AlunoController {
           .json({ msg: "Todos os campos devem serem preenchidos!", error: error.message });
       }
 
-      // criptografando a senha
-      const senhaCriptografada = await bcrypt.hash(senha, 10);
+      
       const existe = await Aluno.findByPk(matricula);
       if (existe) return res.status(409).json({ msg: "Matrícula já existe" });
+      
+      // criptografando a senha
+      const senhaCriptografada = await bcrypt.hash(senha, 10);
 
       await Aluno.create({
         nome,
@@ -33,13 +36,14 @@ class AlunoController {
       }
       return res.status(500).json({
         msg: "Erro interno do servidor",
-        erro: error.message,
+        erro: error.message
       });
     }
   }
+
   static async listarPerfil(req, res) {
     try {
-      const { id: matricula } = req.usuario; // ← ID vem do token e é a matrícula
+      const { matricula } = req.usuario; // ← ID vem do token e é a matrícula
 
       const aluno = await Aluno.findOne({
         where: { matricula },
@@ -58,7 +62,7 @@ class AlunoController {
       });
     }
   }
-  F;
+  
 
   static async listarTodos(req, res) {
     try {
@@ -78,6 +82,8 @@ class AlunoController {
       });
     }
   }
+
+  
 
   static async atualizarPorMatricula(req, res) {
     try {

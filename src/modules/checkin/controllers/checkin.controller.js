@@ -1,135 +1,117 @@
-const Aluno = require('../../aluno/models/aluno.model');
+const Checkin = require("../models/checkin.model");
+const Aluno = require("../../aluno/models/aluno.model");
 
-const bcrypt = require("bcryptjs");
-class AlunoController {
-  static async cadastrar(req, res) { 
-    try {
-      const {nome, email, senha, matricula, plano} = req.body;
-      if (!nome || !email || !senha || !matricula || !plano ) {
-          return res.status(400).json({ msg: "Todos os campos devem serem preenchidos!" });
-      }
-      // criptografando a senha
-      const senhaCriptografada = await bcrypt.hash(senha, 15);
-      const existe = await Aluno.findByPk(matricula);
-      if (existe) return res.status(409).json({ msg: "Matrícula já existe" });
-
-      await Aluno.create({ nome, email, senha: senhaCriptografada, matricula, plano});
-      res.status(200).json({ msg: "Aluno criado com sucesso" });
-    } catch (error) {
-       console.error("Erro completo:", error);
-      if (error.name === "SequelizeValidationError") {
-        return res.status(400).json({
-          msg: "Erro de validação",
-          erro: error.errors.map((e) => e.message),
-        });
-      }
-      return res.status(500).json({
-        msg: "Erro interno do servidor",
-        erro: error.message,
-      });
-    }
-  }
-
-  static async listarPorMatricula(req, res) {
-    try {
-      const { matricula } = req.params;
-      const aluno = await Aluno.findOne({
-        where: { matricula },
-        attributes: [
-          "nome",
-          "email",
-          "matricula",
-          "plano",          
-        ],
-      });
-
-      if (!aluno) {
-        return res.status(404).json({ msg: "Não existe aluno cadastrado!" });
-      }
-      res.status(200).json(aluno);
-    } catch (error) {
-      res
-        .status(500)
-        .json({
-          msg: "Erro do servidor. Tente novamente mais tarde!",
-          erro: error.message,
-        });
-    }
-  }
-
+class CheckinController {
+  // GET /checkins → aluno vê os próprios, instrutor vê todos
   static async listarTodos(req, res) {
     try {
-      const alunos = await Aluno.findAll({
-        attributes: [
-          "nome",
-          "email",
-          "matricula",
-          "plano",  
-        ],
-      });
+      const tipo = req.usuario.tipo;
 
-      if (!alunos || alunos.length === 0) {
-        return res.status(404).json({ msg: "Não existe aluno cadastrado!" });
+      if (tipo === "instrutor") {
+        const checkins = await Checkin.findAll();
+        return res.status(200).json(checkins);
       }
 
-      res.status(200).json(alunos);
+      const matricula = req.usuario.id;
+      const checkins = await Checkin.findAll({ where: { alunoId: matricula } });
+      return res.status(200).json(checkins);
     } catch (error) {
-      res.status(500).json({
-        msg: "Erro do servidor. Tente novamente mais tarde!",
-        erro: error.message,
-      });
+      res.status(500).json({ msg: "Erro ao listar check-ins", erro: error.message });
     }
   }
 
-  static async atualizarPorMatricula(req, res) {
+  // GET /checkins/:id → dono ou instrutor
+  static async detalhar(req, res) {
     try {
-      const { matricula } = req.params;
-      const { nome, email, plano } = req.body;
+      const { id } = req.params;
+      const checkin = await Checkin.findByPk(id);
 
-      const aluno = await Aluno.findOne({ where: { matricula } });
+      if (!checkin) return res.status(404).json({ msg: "Check-in não encontrado" });
 
-      if (!aluno) {
-        return res
-          .status(404)
-          .json({ msg: "Aluno não encontrado com essa matrícula!" });
+      const { tipo, id: usuarioId } = req.usuario;
+      if (tipo === "aluno" && checkin.alunoId !== usuarioId) {
+        return res.status(403).json({ msg: "Você só pode acessar seus próprios check-ins" });
       }
 
-      await aluno.update({
-        nome,
-        email,
-        plano,
-      });
-
-      res.status(200).json({ msg: "Aluno atualizado com sucesso!", aluno });
+      return res.status(200).json(checkin);
     } catch (error) {
-      res
-        .status(500)
-        .json({ msg: "Erro ao atualizar aluno.", erro: error.message });
+      res.status(500).json({ msg: "Erro ao detalhar check-in", erro: error.message });
     }
   }
 
-  static async excluirPorMatricula(req, res) {
+  // POST /checkins → aluno próprio
+  static async registrar(req, res) {
     try {
-      const { matricula } = req.params;
+      const { data_hora_entrada } = req.body;
+      const matricula = req.usuario.id;
 
-      const aluno = await Aluno.findOne({ where: { matricula } });
-
-      if (!aluno) {
-        return res
-          .status(404)
-          .json({ msg: "Aluno não encontrado com essa matrícula!" });
+      if (!data_hora_entrada) {
+        return res.status(400).json({ msg: "A data de entrada é obrigatória" });
       }
 
-      await aluno.destroy();
+      const aluno = await Aluno.findByPk(matricula);
+      if (!aluno) {
+        return res.status(404).json({ msg: "Aluno não encontrado" });
+      }
 
-      res.status(200).json({ msg: "Aluno deletado com sucesso!" });
+      const novoCheckin = await Checkin.create({
+        alunoId: matricula,
+        data_hora_entrada,
+        plano: aluno.plano,
+      });
+
+      return res.status(201).json({ msg: "Check-in registrado", checkin: novoCheckin });
     } catch (error) {
-      res
-        .status(500)
-        .json({ msg: "Erro ao deletar aluno.", erro: error.message });
+      res.status(500).json({ msg: "Erro ao registrar check-in", erro: error.message });
+    }
+  }
+
+  // PUT /checkins/:id → aluno próprio ou instrutor
+  static async atualizar(req, res) {
+    try {
+      const { id } = req.params;
+      const { data_hora_saida } = req.body;
+      const checkin = await Checkin.findByPk(id);
+
+      if (!checkin) return res.status(404).json({ msg: "Check-in não encontrado" });
+
+      const { tipo, id: usuarioId } = req.usuario;
+
+      if (tipo === "aluno" && checkin.alunoId !== usuarioId) {
+        return res.status(403).json({ msg: "Você só pode atualizar seus próprios check-ins" });
+      }
+
+      if (data_hora_saida && data_hora_saida < checkin.data_hora_entrada) {
+        return res.status(400).json({ msg: "A data de saída não pode ser anterior à de entrada" });
+      }
+
+      checkin.data_hora_saida = data_hora_saida;
+      await checkin.save();
+
+      return res.status(200).json({ msg: "Check-in atualizado", checkin });
+    } catch (error) {
+      res.status(500).json({ msg: "Erro ao atualizar check-in", erro: error.message });
+    }
+  }
+
+  // DELETE /checkins/:id → apenas instrutor
+  static async deletar(req, res) {
+    try {
+      const { id } = req.params;
+
+      if (req.usuario.tipo !== "instrutor") {
+        return res.status(403).json({ msg: "Apenas instrutores podem deletar check-ins" });
+      }
+
+      const checkin = await Checkin.findByPk(id);
+      if (!checkin) return res.status(404).json({ msg: "Check-in não encontrado" });
+
+      await checkin.destroy();
+      return res.status(200).json({ msg: "Check-in excluído com sucesso" });
+    } catch (error) {
+      res.status(500).json({ msg: "Erro ao excluir check-in", erro: error.message });
     }
   }
 }
 
-module.exports = AlunoController;
-
+module.exports = CheckinController;

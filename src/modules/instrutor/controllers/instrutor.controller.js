@@ -1,23 +1,31 @@
 const Instrutor = require("../models/instrutor.model");
 const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
 
 class InstrutorController {
   static async cadastrar(req, res) {
     try {
+      console.log("BODY RECEBIDO:", req.body); //para saber se está carregando e aparecer no console o body
+
+      if (!req.body || typeof req.body !== "object") {
+        return res
+          .status(400)
+          .json({ msg: "Requisição malformada: corpo ausente ou inválido." });
+      }
+
       const { nome, email, senha, cref } = req.body;
 
       if (!nome || !email || !senha || !cref) {
-        return res.status(400).json({ msg: "Todos os campos são obrigatórios!" });
+        return res
+          .status(400)
+          .json({ msg: "Todos os campos devem ser preenchidos!" });
       }
 
-      const existente = await Instrutor.findByPk(cref);
-      if (existente) {
-        return res.status(409).json({ msg: "CREF já cadastrado!" });
+      const existe = await Instrutor.findByPk(cref);
+      if (existe) {
+        return res.status(409).json({ msg: "Instrutor já cadastrado!" });
       }
 
       const senhaCriptografada = await bcrypt.hash(senha, 10);
-
       await Instrutor.create({
         nome,
         email,
@@ -33,64 +41,101 @@ class InstrutorController {
           erros: error.errors.map((e) => e.message),
         });
       }
-
-      res.status(500).json({ msg: "Erro no servidor", erro: error.message });
+      return res
+        .status(500)
+        .json({ msg: "Erro no servidor", erro: error.message });
     }
   }
 
-  static async login(req, res) {
+  static async listarPerfil(req, res) {
     try {
-      const { email, senha } = req.body;
+      const { cref } = req.usuario; // ← chave primaria cref
 
-      if (!email || !senha) {
-        return res.status(400).json({ msg: "E-mail e senha são obrigatórios." });
-      }
-
-      const instrutor = await Instrutor.findOne({ where: { email } });
-      if (!instrutor) {
-        return res.status(401).json({ msg: "Credenciais inválidas." });
-      }
-
-      const senhaValida = await bcrypt.compare(senha, instrutor.senha);
-      if (!senhaValida) {
-        return res.status(401).json({ msg: "Credenciais inválidas." });
-      }
-
-      const token = jwt.sign(
-        {
-          id: instrutor.cref,
-          papel: "instrutor",
-          email: instrutor.email,
-        },
-        process.env.JWT_SECRET,
-        { expiresIn: "1h" }
-      );
-
-      res.status(200).json({ msg: "Login bem-sucedido", token });
-    } catch (error) {
-      res.status(500).json({ msg: "Erro ao realizar login", erro: error.message });
-    }
-  }
-
-  static async perfil(req, res) {
-    try {
-      const { id, papel } = req.usuario;
-
-      if (papel !== "instrutor") {
-        return res.status(403).json({ msg: "Acesso negado ao perfil do instrutor." });
-      }
-
-      const instrutor = await Instrutor.findByPk(id, {
+      const instrutor = await Instrutor.findOne({
+        where: { cref },
         attributes: ["nome", "email", "cref"],
       });
 
       if (!instrutor) {
-        return res.status(404).json({ msg: "Instrutor não encontrado." });
+        return res
+          .status(404)
+          .json({ msg: "Não existe instrutor cadastrado!" });
       }
 
       res.status(200).json(instrutor);
     } catch (error) {
-      res.status(500).json({ msg: "Erro ao carregar perfil", erro: error.message });
+      res.status(500).json({
+        msg: "Erro do servidor. Tente novamente mais tarde!",
+        erro: error.message,
+      });
+    }
+  }
+
+  static async listarTodos(req, res) {
+    try {
+      const instrutores = await Instrutor.findAll({
+        attributes: ["nome", "email", "cref"],
+      });
+
+      if (!instrutores || instrutores.length === 0) {
+        return res
+          .status(404)
+          .json({ msg: "Não existe instrutor cadastrado!" });
+      }
+
+      res.status(200).json(instrutores);
+    } catch (error) {
+      res.status(500).json({
+        msg: "Erro do servidor. Tente novamente mais tarde!",
+        erro: error.message,
+      });
+    }
+  }
+
+  static async atualizarPorCref(req, res) {
+    try {
+      const { cref } = req.params;
+      const { nome, email } = req.body;
+
+      const instrutor = await Instrutor.findOne({ where: { cref } });
+
+      if (!instrutor) {
+        return res
+          .status(404)
+          .json({ msg: "Instrutor não encontrado com esse cref!" });
+      }
+
+      await instrutor.update({ nome, email });
+
+      res
+        .status(200)
+        .json({ msg: "Instrutor atualizado com sucesso!", instrutor });
+    } catch (error) {
+      res
+        .status(500)
+        .json({ msg: "Erro ao atualizar instrutor.", erro: error.message });
+    }
+  }
+
+  static async excluirPorCref(req, res) {
+    try {
+      const { cref } = req.params;
+
+      const instrutor = await Instrutor.findOne({ where: { cref } });
+
+      if (!instrutor) {
+        return res
+          .status(404)
+          .json({ msg: "Instrutor não encontrado com esse cref!" });
+      }
+
+      await instrutor.destroy();
+
+      res.status(200).json({ msg: "Instrutor deletado com sucesso!" });
+    } catch (error) {
+      res
+        .status(500)
+        .json({ msg: "Erro ao deletar instrutor.", erro: error.message });
     }
   }
 }

@@ -1,7 +1,6 @@
 const express = require('express');
 const AlunoController = require('../controllers/aluno.controller');
 const AutenticacaoMiddleware = require('../../../middleware/autenticacao.usuario.middleware');
-const LoginLogout = require('../../login_logout/controllers/login_logout.controller');
 
 
 const router = express.Router();

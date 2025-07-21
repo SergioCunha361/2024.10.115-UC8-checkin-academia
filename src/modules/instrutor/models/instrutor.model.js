@@ -33,7 +33,7 @@ const Instrutor = sequelize.define(
       allowNull: false,
       validate: {
         is: {
-          args: /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,10}$/,
+          args: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+{}\[\]:;<>,.?~\\/-]).{8,}$/,
           msg: "A senha deve ter de 6 a 10 caracteres, com pelo menos uma letra, um número e um caractere especial."
         }
       }

@@ -133,7 +133,6 @@ Desenvolver um sistema completo de controle de check-in e check-out de alunos em
 | PUT    | /checkins/:id  | Atualizar registro       | Sim (JWT)    | Aluno (próprio), instrutor       |
 | DELETE | /checkins/:id  | Excluir registro         | Sim (JWT)    | Apenas instrutor                 |
 
----
 
 ## Validações Obrigatórias
 
@@ -187,3 +186,97 @@ JWT_SECRET=umsegredoseguro
 ## Nome do Repositório
 
 **2024.10.115-UC8-checkin-academia**
+
+
+
+const Usuario = require("../models/usuario.model");
+const bcrypt =require('bcryptjs')
+class UsuarioController {
+  static async cadastrar(req, res) {
+    try {
+      const { nome, papel, matricula, email, senha } = req.body;
+      if (!matricula || !nome || !email || !senha || !papel) {
+        return res
+          .status(400)
+          .json({ msg: "Todos os campos devem serem preenchidos!" });
+      }
+      // criptografando a senha
+      const senhaCriptografada = await bcrypt.hash(senha, 15);
+      await Usuario.create({ nome, papel, matricula, email, senha: senhaCriptografada });
+      res.status(200).json({ msg: 'Usuario criado com sucesso' });
+    } catch (error) {
+        res.status(500).json({msg: 'Erro do servidor. Tente novamente mais tarde!', erro: error.message})
+    }
+  }
+  static async perfil(req, res) {
+    try {
+      const { matricula } = req.usuario
+      const Usuario = await Usuario.findOne({
+        where: {matricula},
+        attributes: ['nome','email', 'matricula']
+      });
+      if (!Usuario) {
+        return res.status(401).json({ msg: "Não existe Usuario cadastrado!" });
+      }
+      res.status(200).json(Usuario);
+    } catch (error) {
+        res.status(500).json({msg: 'Erro do servidor. Tente novamente mais tarde!'})
+    }
+  }
+  static listar(req, res){
+    res.status(200).json({mensagem: 'Listando usuarios...'})
+  }
+}
+
+module.exports = UsuarioController
+
+
+--------------------------------------------
+
+
+const express = require('express');
+const UsuarioController = require('../controllers/usuario.controller')
+const AutenticacaoMiddleware = require('../../../middleware/autenticacao.middleware')
+const AutorizacaoMiddleware = require('../../../middleware/autorizacao.middleware')
+
+const router = express.Router()
+
+// rota de cadastro
+router.post('/cadastrar', UsuarioController.cadastrar)
+
+// rota de perfil
+router.get('/perfil', AutenticacaoMiddleware.autenticarToken, UsuarioController.perfil)
+
+// rota de tarefa
+router.get('/listar-tarefa', AutenticacaoMiddleware.autenticarToken, AutorizacaoMiddleware.autorizar(['professor','secretario']), UsuarioController.listar )
+
+module.exports = router
+
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJub21lIjoiRmxhdmlvIEN1bmhhIiwiaWQiOiJGMTIzNDU2NzgiLCJ0aXBvIjoiYWx1bm8iLCJpYXQiOjE3NTMwNjE1MjIsImV4cCI6MTc1MzA2MjEyMn0.QTxtk7Etji070LOTuxQtlq_8SGdwo6zi9Ek7QvuXXGY
+
+{
+  "nome": "Flavio Cunha",
+  "email": "flaviocunha@teste.com",
+  "senha": "Academia@2024",
+  "matricula": "F12345678",
+  "plano": "anual"
+}       {
+  "nome": "Fernando Cunha",
+  "email": "fernandocunha@teste.com",
+  "senha": "Acaa@2024",
+  "matricula": "H12345678",
+  "plano": "anual"
+} 
+
+  {
+    "nome": "Beatriz Almeida",
+    "email": "beatriz.almeida@teste.com",
+    "matricula": "B87654321",
+    "senha": "Senha$789",
+    "plano": "anual"
+  }
+
+  eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJub21lIjoiQmVhdHJpeiBBbG1laWRhIiwiaWQiOiJCODc2NTQzMjEiLCJ0aXBvIjoiYWx1bm8iLCJpYXQiOjE3NTMxMTIxNTAsImV4cCI6MTc1MzExMjc1MH0.JD5gdmlhXVGO5adG84oQ3RFgj1F1wiQX2gc29BrA4ko
+
+
+  eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJub21lIjoiRmxhdmlvIEN1bmhhIiwiaWQiOiJGMTIzNDU2NzgiLCJ0aXBvIjoiYWx1bm8iLCJpYXQiOjE3NTMxMTI3MTEsImV4cCI6MTc1MzExMzMxMX0.D2qfqKS5FfM9J-7V4rozIqNPdqmkhzANmKCK2xiiyWk

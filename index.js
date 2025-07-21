@@ -10,7 +10,7 @@ const instrutorRoute = require('./src/modules/instrutor/routes/instrutor.route')
 const checkinRoute = require('./src/modules/checkin/routes/checkin.route');
 
 // Relacionamentos entre models
-require('./src/realcionamento.js');
+require('./src/realcionamento');
 
 
 
@@ -18,14 +18,13 @@ require('./src/realcionamento.js');
 dotenv.config();
 
 const app = express();
-
-// Libera acesso do frontend (ex: React)
 app.use(cors({
   origin: 'http://localhost:5173',
   credentials: true
 }));
 
-app.use(express.json());
+app.use(express.json()); // ← ESSE TEM QUE VIR AQUI!
+
 
 // Rotas principais
 app.use('/api/', loginLogoutRoute);
