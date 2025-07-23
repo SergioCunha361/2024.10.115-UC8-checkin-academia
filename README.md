@@ -252,31 +252,11 @@ router.get('/listar-tarefa', AutenticacaoMiddleware.autenticarToken, Autorizacao
 
 module.exports = router
 
-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJub21lIjoiRmxhdmlvIEN1bmhhIiwiaWQiOiJGMTIzNDU2NzgiLCJ0aXBvIjoiYWx1bm8iLCJpYXQiOjE3NTMwNjE1MjIsImV4cCI6MTc1MzA2MjEyMn0.QTxtk7Etji070LOTuxQtlq_8SGdwo6zi9Ek7QvuXXGY
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJub21lIjoiSm_Do28gUGVyZWlyYSIsImlkIjoiSjEyMzQ1Njc4IiwidGlwbyI6ImFsdW5vIiwiaWF0IjoxNzUzMjk3NzUzLCJleHAiOjE3NTMzMDEwNTN9.9w0Tye-PragGxiQDBkpZwFEzMUwVHmyUFt8UDxju6ow
+
 
 {
-  "nome": "Flavio Cunha",
-  "email": "flaviocunha@teste.com",
-  "senha": "Academia@2024",
-  "matricula": "F12345678",
-  "plano": "anual"
-}       {
-  "nome": "Fernando Cunha",
-  "email": "fernandocunha@teste.com",
-  "senha": "Acaa@2024",
-  "matricula": "H12345678",
-  "plano": "anual"
-} 
+  "senha": "Senha@123",
+  "matricula": "J12345678"
 
-  {
-    "nome": "Beatriz Almeida",
-    "email": "beatriz.almeida@teste.com",
-    "matricula": "B87654321",
-    "senha": "Senha$789",
-    "plano": "anual"
-  }
-
-  eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJub21lIjoiQmVhdHJpeiBBbG1laWRhIiwiaWQiOiJCODc2NTQzMjEiLCJ0aXBvIjoiYWx1bm8iLCJpYXQiOjE3NTMxMTIxNTAsImV4cCI6MTc1MzExMjc1MH0.JD5gdmlhXVGO5adG84oQ3RFgj1F1wiQX2gc29BrA4ko
-
-
-  eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJub21lIjoiRmxhdmlvIEN1bmhhIiwiaWQiOiJGMTIzNDU2NzgiLCJ0aXBvIjoiYWx1bm8iLCJpYXQiOjE3NTMxMTI3MTEsImV4cCI6MTc1MzExMzMxMX0.D2qfqKS5FfM9J-7V4rozIqNPdqmkhzANmKCK2xiiyWk
+}
