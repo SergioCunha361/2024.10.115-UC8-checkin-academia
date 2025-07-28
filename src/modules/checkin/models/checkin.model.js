@@ -14,7 +14,8 @@ const Checkin = sequelize.define("Checkin", {
     references: {
       model: 'alunoAcad',
       key: 'matricula',
-    },   
+    }, 
+    onDelete:"CASCADE",  
   },
 
   data_hora_entrada: {

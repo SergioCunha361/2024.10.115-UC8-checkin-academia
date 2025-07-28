@@ -42,9 +42,7 @@ app.listen(PORT, async () => {
     await sequelize.authenticate();
     console.log('✅ Conexão com o banco de dados estabelecida.');
 
-    await sequelize.sync({ alter: false , force: false }); // `force: true` apaga tudo – cuidado!
-    // force: false não apaga os dados do banco cada vez que vc subir o servidor
-    console.log('✅ Banco de dados sincronizado.');
+    
   } catch (err) {
     console.error('❌ Erro ao conectar ou sincronizar o banco de dados:', err);
   }
