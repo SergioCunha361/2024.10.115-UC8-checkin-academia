@@ -1,5 +1,7 @@
 'use strict';
 
+const { toDefaultValue } = require('sequelize/lib/utils');
+
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up (queryInterface, Sequelize) {
@@ -26,6 +28,11 @@ module.exports = {
             primaryKey: true,
             
           },
+         plano: {
+           type: Sequelize.ENUM("mensal", "trimestral", "anual"),
+           allowNull: false,
+           },
+
      });
      
     // Adicionar índices para facilitar pesquisas independe da cve primária

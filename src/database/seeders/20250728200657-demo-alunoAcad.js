@@ -1,12 +1,14 @@
 'use strict';
 
+const bcrypt = require('bcryptjs')
+
 module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.bulkInsert('alunoAcad', [
       {
         nome: 'João Silva',
         email: 'joao.silva@email.com',
-        senha: 'Joao@123', // supondo que já foi criptografada se necessário
+        senha: await bcrypt.hash('senha@123', 10), // supondo que já foi criptografada se necessário
         matricula: 'A12345678',
         plano: 'mensal',
         criado_em: new Date(),
@@ -15,7 +17,7 @@ module.exports = {
       {
         nome: 'Maria Souza',
         email: 'maria.souza@email.com',
-        senha: 'Maria@456',
+        senha: await bcrypt.hash('senha@123', 10),
         matricula: 'B23456789',
         plano: 'trimestral',
         criado_em: new Date(),
@@ -24,7 +26,7 @@ module.exports = {
       {
         nome: 'Carlos Andrade',
         email: 'carlos.andrade@email.com',
-        senha: 'Car@7890',
+        senha: await bcrypt.hash('senha@123', 10),
         matricula: 'C34567890',
         plano: 'anual',
         criado_em: new Date(),
@@ -33,7 +35,7 @@ module.exports = {
       {
         nome: 'Ana Paula',
         email: 'ana.paula@email.com',
-        senha: 'Ana!2345',
+        senha: await bcrypt.hash('senha@123', 10),
         matricula: 'D45678901',
         plano: 'mensal',
         criado_em: new Date(),
@@ -42,7 +44,7 @@ module.exports = {
       {
         nome: 'Felipe Martins',
         email: 'felipe.martins@email.com',
-        senha: 'Felipe#321',
+        senha: await bcrypt.hash('senha@123', 10),
         matricula: 'E56789012',
         plano: 'trimestral',
         criado_em: new Date(),
